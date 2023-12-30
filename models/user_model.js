@@ -67,17 +67,17 @@ userSchema.methods.generateAccessToken = function () {
   );
 };
 
-
 userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign(
-      {
-        _id: this._id,
-      },
-      process.env.REFRESHTOKEN_SECRET,
-      {
-        expiresIn: process.env.REFRESHTOKEN_SECRET_EXPIRY,
-      }
-    );
-  };
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESHTOKEN_SECRET,
+    {
+      expiresIn: process.env.REFRESHTOKEN_SECRET_EXPIRY,
+    }
+  );
+};
 
-export const User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+export default User;
