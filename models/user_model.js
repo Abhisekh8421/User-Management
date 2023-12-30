@@ -10,13 +10,15 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
       lowercase: true,
-      index: true,
+      index: true, // for performance
+      trim: true, //any leading whitespaces will removed before saving the document
     },
     email: {
       type: String,
       unique: true,
       lowercase: true,
       required: true,
+      index: true,
     },
     role: {
       type: String,
@@ -42,3 +44,40 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+userSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.ACCESSTOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESSTOKEN_SECRET_EXPIRY,
+    }
+  );
+};
+
+
+userSchema.methods.generateRefreshToken = function () {
+    return jwt.sign(
+      {
+        _id: this._id,
+      },
+      process.env.REFRESHTOKEN_SECRET,
+      {
+        expiresIn: process.env.REFRESHTOKEN_SECRET_EXPIRY,
+      }
+    );
+  };
+
+export const User = mongoose.model("User", userSchema);
