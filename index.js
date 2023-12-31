@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 //router
 
-app.use("/api/v1/users", userRouter);
+app.use("/api/v1/rolemate", userRouter);
 
 app.use(
   cors({

@@ -5,12 +5,6 @@ import isAuthenticated from "../middlewares/user_Auth.js";
 
 const router = express.Router();
 
-router.route("/register").post(
-  upload.fields({
-    name: "ProfileImage",
-    maxCount: 1,
-  }),
-  RegisterUser
-);
+router.route("/register").post(upload.single("ProfileImage"), RegisterUser);
 
 export default router;

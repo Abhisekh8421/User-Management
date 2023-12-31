@@ -1,16 +1,16 @@
 class ApiError extends Error {
   constructor(
-    statuscode,
-    message = "something internal error",
+    statusCode,
+    message = "some related error",
     errors = [],
     stack = ""
   ) {
     super(message);
-    this.statuscode = statuscode;
+    this.errors = errors;
     this.data = null;
     this.message = message;
-    this.errors = errors;
     this.success = false;
+    this.statusCode = statusCode;
     if (stack) {
       this.stack = stack;
     } else {
@@ -19,4 +19,4 @@ class ApiError extends Error {
   }
 }
 
-export default { ApiError };
+export { ApiError };
