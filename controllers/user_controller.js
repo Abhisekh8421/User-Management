@@ -25,16 +25,16 @@ export const RegisterUser = asyncHandler(async (req, res) => {
       message: "User Already Exists",
     });
   }
-  console.log("profile path", req.files?.ProfileImage[0]?.path);
-  const UserAvatarLocalPath = req.files?.ProfileImage[0]?.path;
-  console.log("avatar local path", UserAvatarLocalPath);
+
+  const UserAvatarLocalPath = req.file.path;
+  // console.log("avatar local path", UserAvatarLocalPath);
 
   if (!UserAvatarLocalPath) {
     throw new ApiError(400, "Avatar local path is required");
   }
 
   const avatar = await uploadOnCloudinary(UserAvatarLocalPath);
-  console.log("Avatar clodinary path", avatar);
+  // console.log("Avatar clodinary path", avatar);
 
   if (!avatar) {
     throw new ApiError(400, "Error uploading avatar to Cloudinary");
