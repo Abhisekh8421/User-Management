@@ -13,7 +13,7 @@ export const RegisterUser = asyncHandler(async (req, res) => {
       (field) => field?.trim() === ""
     )
   ) {
-    throw new ApiError(400, "All Fields are required");
+    throw new ApiError(400, "All Fields are required");//for data validation 
   }
 
   const existedUser = await User.findOne({
