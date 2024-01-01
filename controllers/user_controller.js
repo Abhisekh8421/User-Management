@@ -1,5 +1,4 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import User from "../models/user_model.js";
@@ -13,7 +12,7 @@ export const RegisterUser = asyncHandler(async (req, res) => {
       (field) => field?.trim() === ""
     )
   ) {
-    throw new ApiError(400, "All Fields are required");//for data validation 
+    throw new ApiError(400, "All Fields are required"); //for data validation
   }
 
   const existedUser = await User.findOne({
@@ -27,7 +26,7 @@ export const RegisterUser = asyncHandler(async (req, res) => {
   }
 
   const UserAvatarLocalPath = req.file.path;
-  // console.log("avatar local path", UserAvatarLocalPath); for debugging purposes 
+  // console.log("avatar local path", UserAvatarLocalPath); for debugging purposes
 
   if (!UserAvatarLocalPath) {
     throw new ApiError(400, "Avatar local path is required");
