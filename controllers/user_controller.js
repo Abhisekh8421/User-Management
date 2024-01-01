@@ -17,7 +17,7 @@ export const RegisterUser = asyncHandler(async (req, res) => {
   }
 
   const existedUser = await User.findOne({
-    $or: [{ username }, { email }], //checking for existed User
+    $or: [{ username }, { email }], //checking for existed User in database
   });
   if (existedUser) {
     return res.status(400).json({
@@ -27,14 +27,14 @@ export const RegisterUser = asyncHandler(async (req, res) => {
   }
 
   const UserAvatarLocalPath = req.file.path;
-  // console.log("avatar local path", UserAvatarLocalPath);
+  // console.log("avatar local path", UserAvatarLocalPath); for debugging purposes
 
   if (!UserAvatarLocalPath) {
     throw new ApiError(400, "Avatar local path is required");
   }
 
   const avatar = await uploadOnCloudinary(UserAvatarLocalPath);
-  // console.log("Avatar clodinary path", avatar);
+  // console.log("Avatar clodinary path", avatar); for debugging purpose
 
   if (!avatar) {
     throw new ApiError(400, "Error uploading avatar to Cloudinary");

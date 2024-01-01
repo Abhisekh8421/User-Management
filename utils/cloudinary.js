@@ -16,7 +16,7 @@ export const uploadOnCloudinary = async (localpath) => {
       resource_type: "auto",
     });
     fs.unlinkSync(localpath);
-    console.log("response", responce);
+    // console.log("response", responce); for debugging purpose 
     return responce;
   } catch (error) {
     console.log("error is encountered ", error.message);
