@@ -4,6 +4,23 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import User from "../models/user_model.js";
 import { ApiError } from "../utils/ApiError.js";
 
+const generateAccessandRefreshToken = async (userid) => {
+  try {
+    const user = await User.findById(userid);
+    if (!user) {
+      throw new ApiError(404, "User Does Not Exist");
+    }
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false }); //save a user instance to the database without triggering the validation process
+    return { accessToken, refreshToken };
+  } catch (error) {
+    // console.error("Error in generateAccessandRefreshToken:", error.message); for debugging process
+    throw new ApiError(500, "something went wrong");
+  }
+};
+
 export const RegisterUser = asyncHandler(async (req, res) => {
   const { username, email, role, phoneNumber, password } = req.body;
 
@@ -41,7 +58,7 @@ export const RegisterUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     username,
-    ProfileImage: avatar?.url,
+    profileImage: avatar?.url,
     email,
     password,
     phoneNumber,
@@ -59,4 +76,48 @@ export const RegisterUser = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(201, createdUser, "User Registered Successfully"));
+});
+
+export const LoginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  if (!email) {
+    throw new ApiError(400, "email is required!!!");
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, "User Doesnot Exist");
+  }
+  const isPasswordValid = await user.isPasswordCorrect(password); //using the instance of User
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid Password");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessandRefreshToken(
+    user._id
+  );
+
+  const loggedUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedUser,
+          accessToken,
+          refreshToken,
+        },
+        "user is successfully logged in"
+      )
+    );
 });

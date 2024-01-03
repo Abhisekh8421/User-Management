@@ -26,10 +26,10 @@ const userSchema = new mongoose.Schema(
       enum: ["Admin", "User"],
       default: "User",
     },
-    ProfileImage: {
+    profileImage: {
       type: String,
     },
-    PhoneNumber: {
+    phoneNumber: {
       type: String,
     },
     password: {
