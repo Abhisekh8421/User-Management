@@ -157,17 +157,18 @@ export const RefreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Unauthorized Request");
     }
 
-    const decodedToken = jwt.verify(
+    const decodedToken =  jwt.verify(
       incomingRefreshToken,
       process.env.REFRESHTOKEN_SECRET
     );
 
-    const user = await User.findById(decodedToken?._id);
+    const user = await User.findById(decodedToken?._id); // If the token is valid, it fetches the corresponding user from the database.
     if (!user) {
-      throw new ApiError(401, "Invalid Token");
+      throw new ApiError(401, "Invalid Token"); //If the user is not found, it throws an invalid token error.
     }
 
     if (incomingRefreshToken !== user.refreshToken) {
+      // Checks if the incoming refresh token matches the stored refresh token for the user.
       throw new ApiError(401, " refresh Token Expired or used");
     }
 
