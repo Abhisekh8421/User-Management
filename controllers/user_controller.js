@@ -201,33 +201,59 @@ export const UpdateRefreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 export const UpdateUserDetails = asyncHandler(async (req, res) => {
-  const { username } = req.body;
-  const profileImageLocalPath = req.file?.path;
-  if (!username) {
-    throw new ApiError(401, "Username is Missing");
-  }
-  if (!profileImageLocalPath) {
-    throw new ApiError(401, "avatar file is Missing");
-  }
-
-  const profileImage = await uploadOnCloudinary(profileImageLocalPath);
-  if (!profileImage.url) {
-    throw new ApiError(400, "error uploading on cloudinary");
-  }
-
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      $set: {
-        profileImage: profileImage.url,
-        username,
-      },
-    },
-    {
-      new: true,
+  try {
+    const { username } = req.body;
+    const profileImageLocalPath = req.file?.path;
+    if (!username) {
+      throw new ApiError(401, "Username is Missing");
     }
-  ).select("-password");
-  return res
-    .status(200)
-    .json(new ApiResponse(200, user, "Updated User Details Successfully"));
+    if (!profileImageLocalPath) {
+      throw new ApiError(401, "avatar file is Missing");
+    }
+
+    const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+    if (!profileImage.url) {
+      throw new ApiError(400, "error uploading on cloudinary");
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          profileImage: profileImage.url,
+          username,
+        },
+      },
+      {
+        new: true,
+      }
+    ).select("-password");
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "Updated User Details Successfully"));
+  } catch (error) {
+    console.log("error is ", error.message);
+    throw new ApiError(error.status || 500, "internal server error");
+  }
 });
+
+export const UserProfile = asyncHandler(async (req, res) => {
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        message: `your profile is found: ${req.user.username}`,
+        user: req.user,
+      },
+      "successfully fetched your profile"
+    )
+  );
+});
+
+export const DeleteUserProfile = asyncHandler(async (req, res) => {
+  const user = req.user._id;
+  await User.findByIdAndDelete(user);
+  return res.status(200).json(new ApiResponse(200, {}, "successfully deleted"));
+});
+
+

@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
+      immutable: true, // field cannot be changed
     },
     password: {
       type: String,

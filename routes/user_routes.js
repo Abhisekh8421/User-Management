@@ -1,11 +1,13 @@
 import express from "express";
 import { upload } from "../middlewares/multer_middleware.js";
 import {
+  DeleteUserProfile,
   LoginUser,
   LogoutUser,
   RegisterUser,
   UpdateRefreshAccessToken,
   UpdateUserDetails,
+  UserProfile,
 } from "../controllers/user_controller.js";
 import isAuthenticated from "../middlewares/user_Auth.js";
 
@@ -21,6 +23,10 @@ router.route("/refresh-token").post(UpdateRefreshAccessToken);
 
 router
   .route("/updateUser")
-  .post(isAuthenticated, upload.single("profileImage"), UpdateUserDetails);
+  .put(isAuthenticated, upload.single("profileImage"), UpdateUserDetails);
+
+router.route("/user-profile").get(isAuthenticated, UserProfile);
+
+router.route("/delete-profile").delete(isAuthenticated, DeleteUserProfile);
 
 export default router;

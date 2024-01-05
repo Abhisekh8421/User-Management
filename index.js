@@ -4,6 +4,7 @@ import { connectDb } from "./db/user_db.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/user_routes.js";
+import adminRouter from "./routes/admin_routes.js";
 dotenv.config({
   path: "./.env",
 });
@@ -22,6 +23,7 @@ app.use(cookieParser());
 //router
 
 app.use("/api/v1/rolemate", userRouter);
+app.use("/api/v1/rolemate/admin", adminRouter);
 
 app.use(
   cors({
