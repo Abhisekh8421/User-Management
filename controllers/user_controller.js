@@ -148,7 +148,7 @@ export const LogoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "user logged out"));
 });
 
-export const RefreshAccessToken = asyncHandler(async (req, res) => {
+export const UpdateRefreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const incomingRefreshToken =
       req.cookies.refreshToken || req.body.refreshToken;
@@ -157,7 +157,7 @@ export const RefreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Unauthorized Request");
     }
 
-    const decodedToken =  jwt.verify(
+    const decodedToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESHTOKEN_SECRET
     );
@@ -198,4 +198,36 @@ export const RefreshAccessToken = asyncHandler(async (req, res) => {
     // console.log("error is ", error.message); debugging purpose
     throw new ApiError(401, error?.message || "something went wrong");
   }
+});
+
+export const UpdateUserDetails = asyncHandler(async (req, res) => {
+  const { username } = req.body;
+  const profileImageLocalPath = req.file?.path;
+  if (!username) {
+    throw new ApiError(401, "Username is Missing");
+  }
+  if (!profileImageLocalPath) {
+    throw new ApiError(401, "avatar file is Missing");
+  }
+
+  const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+  if (!profileImage.url) {
+    throw new ApiError(400, "error uploading on cloudinary");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        profileImage: profileImage.url,
+        username,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Updated User Details Successfully"));
 });
