@@ -18,6 +18,4 @@ adminRouter
   .delete(isAuthenticated, deleteUserByid)
   .put(isAuthenticated, upload.single("profileImage"), UpdateUserById);
 
-a;
-
 export default adminRouter;
