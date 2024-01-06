@@ -100,3 +100,95 @@ export const UpdateUserById = asyncHandler(async (req, res) => {
       new ApiResponse(200, UpdatedUser, "Successfully updated the User details")
     );
 });
+
+export const CreateExistingUserToAdmin = asyncHandler(async (req, res) => {
+  if (!(req.user.role == "Admin")) {
+    throw new ApiError(401, "Access denied"); //checking the user is a admin or not
+  }
+
+  const { userId } = req.params;
+  try {
+    const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) {
+      throw new ApiError(404, "User is Not found");
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $set: {
+          role: "Admin",
+        },
+      },
+      {
+        new: true,
+      }
+    ).select("-password -refreshToken");
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          updatedUser,
+        },
+        "User role updated successfully"
+      )
+    );
+  } catch (error) {
+    console.log("the error is :", error.message); //for debugging purpose
+    throw new ApiError(500, "Internal Server Error");
+  }
+});
+
+export const CreateNewAdmin = asyncHandler(async (req, res) => {
+  if (!(req.user.role == "Admin")) {
+    throw new ApiError(401, "Access denied"); //checking the user is a admin or not
+  }
+
+  const { username, email, phoneNumber, password } = req.body;
+  if (
+    [username, email, phoneNumber, password].some(
+      (field) => field?.trim() === ""
+    )
+  ) {
+    throw new ApiError(400, "All Fields are required"); //for data validation
+  }
+
+  const profileImageLocalPath = req.file.path;
+  if (!profileImageLocalPath) {
+    throw new ApiError(400, "Profile local path is notfound");
+  }
+  const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+
+  if (!profileImage) {
+    throw new ApiError(400, "error uploading on cloudinary");
+  }
+
+  const existedUser = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+  if (existedUser) {
+    return res.status(400).json({
+      success: false,
+      message: "User Already Exists",
+    });
+  }
+
+  const adminUser = await User.create({
+    username,
+    password,
+    phoneNumber,
+    email,
+    role: "Admin",
+    profileImage: profileImage?.url,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        adminUser,
+      },
+      "Admin account created successfully"
+    )
+  );
+});

@@ -220,7 +220,7 @@ export const UpdateUserDetails = asyncHandler(async (req, res) => {
       req.user._id,
       {
         $set: {
-          profileImage: profileImage.url,
+          profileImage: profileImage?.url,
           username,
         },
       },
@@ -255,5 +255,3 @@ export const DeleteUserProfile = asyncHandler(async (req, res) => {
   await User.findByIdAndDelete(user);
   return res.status(200).json(new ApiResponse(200, {}, "successfully deleted"));
 });
-
-
