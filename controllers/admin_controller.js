@@ -61,44 +61,52 @@ export const deleteUserByid = asyncHandler(async (req, res) => {
 });
 
 export const UpdateUserById = asyncHandler(async (req, res) => {
-  if (!(req.user.role == "Admin")) {
-    throw new ApiError(401, "Access denied"); //checking the user is a admin or not
-  }
-  const { userId } = req.params;
-  const { username, email } = req.body;
-  const profileImageLocalPath = req.file?.path;
-
-  if (!username) {
-    throw new ApiError(401, "Username is Missing");
-  }
-  if (!profileImageLocalPath) {
-    throw new ApiError(401, "avatar file is Missing");
-  }
-
-  const profileImage = await uploadOnCloudinary(profileImageLocalPath);
-  if (!profileImage.url) {
-    throw new ApiError(400, "error uploading on cloudinary");
-  }
-
-  const UpdatedUser = await User.findByIdAndUpdate(
-    userId,
-    {
-      $set: {
-        username,
-        email,
-        profileImage: profileImage.url,
-      },
-    },
-    {
-      new: true,
+  try {
+    if (!(req.user.role == "Admin")) {
+      throw new ApiError(401, "Access denied"); //checking the user is a admin or not
     }
-  ).select("-password -refreshToken");
+    const { userId } = req.params;
+    const { username, email } = req.body;
+    const profileImageLocalPath = req.file?.path;
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, UpdatedUser, "Successfully updated the User details")
-    );
+    if (!username) {
+      throw new ApiError(401, "Username is Missing");
+    }
+    if (!profileImageLocalPath) {
+      throw new ApiError(401, "avatar file is Missing");
+    }
+
+    const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+    if (!profileImage.url) {
+      throw new ApiError(400, "error uploading on cloudinary");
+    }
+
+    const UpdatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          username,
+          email,
+          profileImage: profileImage.url,
+        },
+      },
+      {
+        new: true,
+      }
+    ).select("-password -refreshToken");
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          UpdatedUser,
+          "Successfully updated the User details"
+        )
+      );
+  } catch (error) {
+    console.log("error is :", error.message);
+  }
 });
 
 export const CreateExistingUserToAdmin = asyncHandler(async (req, res) => {
