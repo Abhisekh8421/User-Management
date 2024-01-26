@@ -19,13 +19,13 @@ This repository contains the backend implementation of a user management system 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Abhisekh8421/RoleMate.git
+   git clone https://github.com/Abhisekh8421/User-Management.git
    ```
 
 2. Install dependencies:
 
    ```bash
-   cd RoleMate
+   cd User-Management
    npm install
    ```
 
