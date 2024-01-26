@@ -202,7 +202,10 @@ export const UpdateRefreshAccessToken = asyncHandler(async (req, res) => {
 
 export const UpdateUserDetails = asyncHandler(async (req, res) => {
   try {
+
+    //fetching the userAvatar from the database  
     const currentUser = await User.findById(req.user._id);
+    //store the previous avatar image url on to the variable
     const previousAvatarUrl = currentUser.avatar;
     const { username } = req.body;
     const profileImageLocalPath = req.file?.path;
@@ -217,7 +220,9 @@ export const UpdateUserDetails = asyncHandler(async (req, res) => {
     if (!profileImage.url) {
       throw new ApiError(400, "error uploading on cloudinary");
     }
+  
 
+    //delete the previous avatar image from the cloudinary 
     if (previousAvatarUrl) {
       const publicId = getPublicIdFromUrl(previousAvatarUrl);
       await deleteFromCloudinary(publicId);
