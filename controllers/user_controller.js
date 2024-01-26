@@ -202,6 +202,8 @@ export const UpdateRefreshAccessToken = asyncHandler(async (req, res) => {
 
 export const UpdateUserDetails = asyncHandler(async (req, res) => {
   try {
+    const currentUser = await User.findById(req.user._id);
+    const previousAvatarUrl = currentUser.avatar;
     const { username } = req.body;
     const profileImageLocalPath = req.file?.path;
     if (!username) {
@@ -214,6 +216,11 @@ export const UpdateUserDetails = asyncHandler(async (req, res) => {
     const profileImage = await uploadOnCloudinary(profileImageLocalPath);
     if (!profileImage.url) {
       throw new ApiError(400, "error uploading on cloudinary");
+    }
+
+    if (previousAvatarUrl) {
+      const publicId = getPublicIdFromUrl(previousAvatarUrl);
+      await deleteFromCloudinary(publicId);
     }
 
     const user = await User.findByIdAndUpdate(
